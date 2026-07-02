@@ -2,7 +2,7 @@
 set -e
 
 POSTGRESQL_CONTAINER="postgresql"
-ENV_FILE=".env"
+ENV_FILE="../no-download-vpn/.env"
 
 # Check if .env exists
 if [ ! -f "$ENV_FILE" ]; then
