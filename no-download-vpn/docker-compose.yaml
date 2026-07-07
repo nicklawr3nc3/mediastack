@@ -570,34 +570,34 @@ services:
 ##
 ###########################################################################
 ###########################################################################
-  # bazarr:
-  #   image: lscr.io/linuxserver/bazarr:latest
-  #   container_name: bazarr
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ${FOLDER_FOR_MEDIA:?err}:/data
-  #     - ${FOLDER_FOR_DATA:?err}/bazarr:/config
-  #   environment:
-  #     - PUID=${PUID:?err}
-  #     - PGID=${PGID:?err}
-  #     - TZ=${TIMEZONE:?err}
-  #     - DOCKER_MODS=ghcr.io/themepark-dev/theme.park:bazarr
-  #     - TP_THEME=${TP_THEME:?err}
-  #   # ports:
-  #   #   - ${WEBUI_PORT_BAZARR:?err}:6767
-  #   networks:
-  #     - mediastack
-  #   labels:
-  #     - traefik.enable=true
-  #   # ROUTERS
-  #     - traefik.http.routers.bazarr.service=bazarr
-  #     - traefik.http.routers.bazarr.rule=Host(`bazarr.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #     - traefik.http.routers.bazarr.entrypoints=secureweb
-  #     - traefik.http.routers.bazarr.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
-  #   # SERVICES
-  #     - traefik.http.services.bazarr.loadbalancer.server.scheme=http
-  #     - traefik.http.services.bazarr.loadbalancer.server.port=6767
-  #   # MIDDLEWARES
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    volumes:
+      - ${FOLDER_FOR_MEDIA_HDD:?err}:/data
+      - ${FOLDER_FOR_DATA:?err}/bazarr:/config
+    environment:
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - TZ=${TIMEZONE:?err}
+      - DOCKER_MODS=ghcr.io/themepark-dev/theme.park:bazarr
+      - TP_THEME=${TP_THEME:?err}
+    # ports:
+    #   - ${WEBUI_PORT_BAZARR:?err}:6767
+    networks:
+      - mediastack
+    labels:
+      - traefik.enable=true
+    # ROUTERS
+      - traefik.http.routers.bazarr.service=bazarr
+      - traefik.http.routers.bazarr.rule=Host(`bazarr.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.bazarr.entrypoints=secureweb
+      - traefik.http.routers.bazarr.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+    # SERVICES
+      - traefik.http.services.bazarr.loadbalancer.server.scheme=http
+      - traefik.http.services.bazarr.loadbalancer.server.port=6767
+    # MIDDLEWARES
 
 # ###########################################################################
 # ###########################################################################
@@ -1695,3 +1695,22 @@ services:
   #     start_period: 30s
   #   networks:
   #     - mediastack
+
+  web:
+    image: nginx:alpine
+    container_name: web
+    volumes:
+      - ../../video-transcriber/output:/usr/share/nginx/html:ro
+      - ./nginx-web.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - traefik.enable=true
+    # ROUTERS
+      - traefik.http.routers.web.service=web
+      - traefik.http.routers.web.rule=Host(`web.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.web.entrypoints=secureweb
+      - traefik.http.routers.web.middlewares=security-headers@file,traefik-bouncer@file
+    # SERVICES
+      - traefik.http.services.web.loadbalancer.server.scheme=http
+      - traefik.http.services.web.loadbalancer.server.port=80
+    networks:
+      - mediastack
